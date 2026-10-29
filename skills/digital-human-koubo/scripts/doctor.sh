@@ -1,7 +1,7 @@
 #!/bin/bash
 # 本机环境检查：有的打 ✓ 跳过，缺的才列装法（先列本机系统的，再列其他方式）。不自动安装。
 # 用法：bash doctor.sh        退出码 0 = 齐了，1 = 有缺的
-OS=$(uname -s); case "$OS" in Darwin) SYS=mac;; Linux) SYS=linux;; MINGW*|MSYS*|CYGWIN*) SYS=win;; *) SYS=other;; esac
+OS=$(uname -s | tr -d '\r\n'); case "$OS" in Darwin) SYS=mac;; Linux) SYS=linux;; MINGW*|MSYS*|CYGWIN*) SYS=win;; *) SYS=other;; esac
 MISS=0; OUT=""
 ok(){ printf "  ✓ %s\n" "$1"; }
 need(){ # need 名称 用途 mac装法 win装法 linux装法 其他装法
