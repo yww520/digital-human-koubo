@@ -45,8 +45,8 @@ if command -v node >/dev/null; then
 else need "Node 18+" "Remotion 剪辑" "brew install node" "winget install OpenJS.NodeJS.LTS" "sudo apt install nodejs npm  或  nvm install --lts" "nodejs.org 下载 LTS"; fi
 if command -v whisper-cli >/dev/null; then
   ok "whisper-cli"
-  M=$(ls "${WHISPER_MODEL:-/nonexistent}" ~/Library/Application\ Support/Murmur/models/ggml-medium*.bin ~/models/ggml-medium*.bin ~/.cache/whisper/ggml-medium*.bin 2>/dev/null | head -1)
-  [ -n "$M" ] && ok "whisper 模型 $(basename "$M")" || need "whisper 模型 ggml-medium-q5_0.bin" "逐段回听、逐字对齐" "下载到 ~/models/：curl -L -o ~/models/ggml-medium-q5_0.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium-q5_0.bin" "浏览器打开 huggingface.co/ggerganov/whisper.cpp 下载 ggml-medium-q5_0.bin 放到 %USERPROFILE%\\models\\" "同 macOS 的 curl 命令" "放在任意位置后 export WHISPER_MODEL=模型路径"
+  M=$(ls "${WHISPER_MODEL:-/nonexistent}" ~/Library/Application\ Support/Murmur/models/ggml-*.bin ~/models/ggml-*.bin ~/.cache/whisper/ggml-*.bin 2>/dev/null | head -1)
+  [ -n "$M" ] && ok "whisper 模型 $(basename "$M")" || need "whisper 模型 ggml-base.bin 或 ggml-medium-q5_0.bin" "逐段回听、逐字对齐" "下载到 ~/models/：curl -L -o ~/models/ggml-base.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin" "浏览器打开 huggingface.co/ggerganov/whisper.cpp 下载 ggml-base.bin 放到 %USERPROFILE%\\models\\" "同 macOS 的 curl 命令" "放在任意位置后 export WHISPER_MODEL=模型路径"
 else need "whisper-cli（whisper.cpp）" "逐段回听、逐字对齐" "brew install whisper-cpp" "github.com/ggerganov/whisper.cpp → Releases 下载 Windows 版" "git clone https://github.com/ggerganov/whisper.cpp && cd whisper.cpp && cmake -B build && cmake --build build -j" "源码编译，见 whisper.cpp README"; fi
 echo
 if [ $MISS = 0 ]; then echo "本机环境齐了，不用装任何东西。"; else echo "装好上面 ✗ 的项（任选一种方式），再跑一次 bash doctor.sh 确认。"; fi
