@@ -33,17 +33,13 @@ def load_persona(custom_path=None):
 def extract_json(text):
     if not text:
         return None
-    for line in text.strip().splitlines():
-        line = line.strip()
-        if line.startswith("{") and line.endswith("}"):
-            try:
-                return json.loads(line)
-            except Exception:
-                pass
-    try:
-        return json.loads(text)
-    except Exception:
-        pass
+    s = text.find("{")
+    e = text.rfind("}")
+    if s != -1 and e != -1 and e > s:
+        try:
+            return json.loads(text[s:e+1])
+        except Exception:
+            pass
     import re
     m_thread = re.search(r'"thread_id":\s*"([^"]+)"', text)
     m_run = re.search(r'"run_id":\s*"([^"]+)"', text)
@@ -232,12 +228,12 @@ def main():
             print("已取消操作。")
             return
 
-    # Step 2: 批量提交与轮询
+    # Step 2: 批量提交与并发轮询
     execution_list = tasks_plan[:1] if args.first_only else tasks_plan
     if args.first_only:
         print("\n🧪 [--first-only 模式已启用] 仅拍摄第 1 段供质检验收...")
 
-    ids_map = {}
+    submitted = []
     for item in execution_list:
         sid = item["id"]
         print(f"\n🚀 正在提交 [{sid}] 到小云雀 CLI...")
@@ -259,23 +255,38 @@ def main():
         task_info = extract_json(raw_out)
 
         if not task_info or "thread_id" not in task_info or "run_id" not in task_info:
-            print(f"❌ 提交失败: {raw_out}")
+            print(f"❌ [{sid}] 提交失败: {raw_out}")
             continue
 
         thread_id = task_info["thread_id"]
         run_id = task_info["run_id"]
         web_link = task_info.get("web_thread_link")
-        print(f"✓ 提交成功! Thread ID: {thread_id} | Run ID: {run_id}")
+        print(f"✓ [{sid}] 提交成功! Thread ID: {thread_id} | Run ID: {run_id}")
         if web_link:
             print(f"  🔗 在线预览: {web_link}")
+        sys.stdout.flush()
+        submitted.append({
+            "sid": sid,
+            "thread_id": thread_id,
+            "run_id": run_id,
+            "target_video": out_dir / f"{sid}.mp4"
+        })
 
-        # 轮询并下载
-        print(f"⏳ 正在等待生成完成 (轮询间隔: {args.poll_interval}s)...")
-        completed = False
-        target_video = out_dir / f"{sid}.mp4"
+    print(f"\n⏳ 全部 {len(submitted)} 个片段任务已提交，开始并发轮询生成结果...")
+    sys.stdout.flush()
 
-        for _ in range(90):  # 最多轮询 ~12 分钟
-            time.sleep(args.poll_interval)
+    ids_map = {}
+    pending = list(submitted)
+    start_time = time.time()
+
+    while pending and (time.time() - start_time < 900):  # 最多等待 15 分钟
+        time.sleep(args.poll_interval)
+        for item in list(pending):
+            sid = item["sid"]
+            thread_id = item["thread_id"]
+            run_id = item["run_id"]
+            target_video = item["target_video"]
+
             q_res = subprocess.run(
                 ["pippit-tool-cli", "query-result", "--thread-id", thread_id, "--run-id", run_id, "--download-dir", str(out_dir)],
                 capture_output=True, text=True
@@ -284,31 +295,35 @@ def main():
             q_data = extract_json(q_out)
             if q_data:
                 if q_data.get("completed"):
-                    # 查找下载的视频
                     videos = q_data.get("videos", [])
                     downloaded_path = None
                     if videos and isinstance(videos, list) and "output_path" in videos[0]:
                         downloaded_path = Path(videos[0]["output_path"])
                     if not downloaded_path or not downloaded_path.exists():
-                        # 查找目录下最新生成的 mp4
-                        mp4s = sorted(out_dir.glob("*.mp4"), key=lambda p: p.stat().st_mtime, reverse=True)
-                        if mp4s:
-                            downloaded_path = mp4s[0]
+                        matches = list(out_dir.glob(f"*{thread_id}*.mp4"))
+                        if matches:
+                            downloaded_path = matches[0]
+                        else:
+                            mp4s = sorted(out_dir.glob("*.mp4"), key=lambda p: p.stat().st_mtime, reverse=True)
+                            if mp4s:
+                                downloaded_path = mp4s[0]
 
                     if downloaded_path and downloaded_path.exists():
                         if downloaded_path.resolve() != target_video.resolve():
                             shutil.copyfile(downloaded_path, target_video)
                         print(f"🎉 [{sid}] 视频生成并下载成功: {target_video}")
                         ids_map[sid] = thread_id
-                        completed = True
-                        break
+                        pending.remove(item)
+                        sys.stdout.flush()
 
-                if q_data.get("error_message"):
-                    print(f"❌ 小云雀返回错误: {q_data['error_message']}")
-                    break
+                elif q_data.get("error_message"):
+                    print(f"❌ [{sid}] 小云雀返回错误: {q_data['error_message']}")
+                    pending.remove(item)
+                    sys.stdout.flush()
 
-        if not completed:
-            print(f"⚠️ [{sid}] 轮询超时或生成异常，请检查小云雀客户端。")
+    if pending:
+        for p in pending:
+            print(f"⚠️ [{p['sid']}] 轮询超时，Thread ID: {p['thread_id']}")
 
     # 写入 ids.json
     ids_file = Path(args.ids_out)
