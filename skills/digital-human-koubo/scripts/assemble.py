@@ -12,7 +12,7 @@ if len(a) < 2: sys.exit(__doc__)
 S = json.load(open(a[0])); IDS = json.load(open(a[1]))
 opt = lambda k, d: a[a.index(k) + 1] if k in a else d
 out_name, lang, size = opt('--out', '成片_完整版.mp4'), opt('--lang', 'zh'), opt('--size', '')
-WM = os.environ.get('WHISPER_MODEL') or next((p for p in map(os.path.expanduser, ['~/Library/Application Support/Murmur/models/ggml-medium-q5_0.bin', '~/models/ggml-medium-q5_0.bin', '~/.cache/whisper/ggml-medium-q5_0.bin', '~/models/ggml-medium.bin']) if os.path.exists(p)), '~/models/ggml-medium-q5_0.bin')
+WM = os.environ.get('WHISPER_MODEL') or next((p for p in map(os.path.expanduser, ['~/models/ggml-medium-q5_0.bin', '~/models/ggml-medium.bin', '~/models/ggml-base.bin', '~/models/ggml-small.bin', '~/Library/Application Support/Murmur/models/ggml-medium-q5_0.bin', '~/.cache/whisper/ggml-medium-q5_0.bin']) if os.path.exists(p)), '~/models/ggml-base.bin')
 clean = lambda s: re.sub(r'[\s，。、：；！？,.:;!?“”]', '', s).lower()
 Path('cut').mkdir(exist_ok=True); rep = []
 for s in S:
