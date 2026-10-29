@@ -39,7 +39,11 @@ export const NotoEmoji: React.FC<{
     (async () => {
       const m = await manifest();
       const e = m[char];
-      if (!e) throw new Error(`NotoEmoji: ${char} 不在 public/emoji/manifest.json，先跑 fetch_noto_emoji.py`);
+      if (!e) {
+        console.warn(`NotoEmoji: ${char} 不在 public/emoji/manifest.json，降级显示系统原生 emoji`);
+        continueRender(h);
+        return;
+      }
       if (dead) return;
       setEntry(e);
       if (e.kind === "svg") return continueRender(h);
@@ -68,7 +72,9 @@ export const NotoEmoji: React.FC<{
 
   return (
     <div style={{ width: size, height: size, lineHeight: 0, ...style }}>
-      {entry?.kind === "svg" ? (
+      {!entry ? (
+        <span style={{ fontSize: size * 0.75, display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>{char}</span>
+      ) : entry.kind === "svg" ? (
         <Img src={staticFile(`emoji/${entry.cp}.svg`)} style={{ width: "100%", height: "100%" }} />
       ) : (
         <div ref={box} style={{ width: "100%", height: "100%" }} />
