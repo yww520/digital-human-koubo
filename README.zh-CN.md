@@ -9,6 +9,7 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-black.svg)](LICENSE)
 ![Agent Skill](https://img.shields.io/badge/Agent%20Skill-SKILL.md-orange)
+[![Xiaoyunque CLI](https://img.shields.io/badge/video-小云雀%20CLI%20(Seedance)-00C853)](https://github.com/yww520/digital-human-koubo)
 [![Renoise MCP](https://img.shields.io/badge/video-Renoise%20MCP-ff7a1a)](https://renoise.ai/mcp?utm_medium=xcom&utm_source=official)
 ![Remotion](https://img.shields.io/badge/edit-Remotion%204-0b84f3)
 
@@ -50,8 +51,10 @@
 ## 能做什么
 
 - **一张照片做出固定的数字人**：脸、服装、声音描述、提示词模板都存在 `persona.json`，每条片子都是同一个人。想进什么场景（直播间、门店、教室、京都街头），先用 GPT Image 合成开场画面，再让她开口。
-- **对口型的口播片段**：稿子切成 ≤ 15 秒一段，通过 **[Renoise MCP](https://renoise.ai/mcp?utm_medium=xcom&utm_source=official)** 用 **Grok Video 1.5** 生成。也写了 Wan 3.0、OmniHuman（用你自己的录音驱动口型）的用法。
-- **先报价，再花钱**：每次生成前，Agent 先报「段数 · 秒数 · 积分 · 余额」，你点头才开始；先拍第 1 段给你看，满意再批量。
+- **对口型的口播片段（双引擎支持）**：
+  - **小云雀 CLI（推荐首选）**：通过本机 `pippit-tool-cli generate-video` 调用 **Seedance 2.5 / 2.0** 生成。内置智能 TTS（优先 edge-tts，支持 macOS say 离线兜底）输出高保真音频并驱动唇形同步，国内高速直连，无须 overseas 代理与充值。
+  - **Renoise MCP（原版兼容）**：通过 Renoise 远程 MCP 调用 **Grok Video 1.5** 或 Wan 3.0。
+- **先报价，再花钱**：每次生成前，Agent 先报「段数 · 秒数 · 积分 / credits」，你点头才开始；支持 `--first-only` 先拍第 1 段给你看，满意再批量。
 - **两道质检**：每段用 whisper 回听、和稿子比对；每段抽 4 帧检查（Grok 偶尔会自己往画面里烧字幕，有就重拍那段）。
 - **声音统一**：1/3 倍频程频谱匹配 + 去齿音 + 同一个小房间混响 + 响度统一，30 段分开生成的口播听起来像一次录完（实测齿音段间差 13.2 dB → 5.9 dB）。
 - **按内容推荐剪辑风格**：Agent 先诊断内容，推荐 2 种风格并附预览图，一次问完（风格 · 比例时长 · 花字强度 · 主播）。
@@ -125,7 +128,28 @@ mkdir -p ~/.codex/skills && cp -R skills/digital-human-koubo skills/finance-expl
 cd skills && zip -r ../digital-human-skills.zip digital-human-koubo finance-explainer && cd ..
 ```
 
-### 3 · 接入 Renoise MCP（AI 视频 / 图片生成）
+### 3 · 配置视频生成引擎（小云雀 CLI 或 Renoise MCP）
+
+#### 选项 A：使用小云雀 CLI（推荐，国内直连）
+若你使用小云雀 CLI（`pippit-tool-cli`），无需配置海外代理与 MCP 节点：
+1. 确保已在命令行登录小云雀：
+   ```bash
+   pippit-tool-cli login
+   pippit-tool-cli status  # 查看状态，确认 {"logged_in":true}
+   ```
+2. 直接使用一体化生成命令：
+   ```bash
+   # 预览报价与排期
+   python3 skills/digital-human-koubo/scripts/xyq_generate.py script.json --quote-only
+   
+   # 先试拍第 1 段质检验收
+   python3 skills/digital-human-koubo/scripts/xyq_generate.py script.json --first-only
+   
+   # 确认满意后批量生成
+   python3 skills/digital-human-koubo/scripts/xyq_generate.py script.json --model Seedance_2.5 --ratio 9:16
+   ```
+
+#### 选项 B：接入 Renoise MCP（海外 Grok 模式）
 
 先去 **[renoise.ai](https://renoise.ai/mcp?utm_medium=xcom&utm_source=official)** 注册账号。登录都在浏览器里完成，不用复制任何 API key。
 

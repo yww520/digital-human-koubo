@@ -1,45 +1,67 @@
 {
  "name": "白背心数字人",
+ "engine": "xyq",
+ "xyq": {
+  "avatar_asset": "assets/avatar_ref.jpg",
+  "model": "Seedance_2.5",
+  "ratio": "9:16",
+  "resolution": "720p",
+  "default_duration": 5,
+  "note": "小云雀 CLI 本机调用（pippit-tool-cli generate-video），配合 Seedance_2.5 / Seedance_2.0_mini_lite 与音频驱动对口型"
+ },
+ "tts": {
+  "preferred": "edge-tts",
+  "fallback": "say",
+  "voice_zh": "zh-CN-XiaoxiaoNeural",
+  "voice_mac": "Tingting",
+  "speed_cps": 5.4
+ },
  "renoise": {
   "reference_material": "material:329814",
   "multiview_task": "task:357546",
-  "note": "参考图是用户自己 Grok 视频里的一帧（正脸、闭嘴、头发不挡脸）。换账号或素材过期时，用 assets/avatar_ref.jpg 重新 upload_files 拿新 material id。"
+  "note": "（可选兼容）原 Renoise 远程 MCP 模式素材 ID。用 assets/avatar_ref.jpg 重新 upload_files 拿新 material id。"
  },
  "look": "年轻东亚女性，黑色长发带脸侧碎发，白色罗纹背心，竖屏自拍构图，室内自然光",
  "voice": {
-  "engine": "grok-native",
+  "engine": "edge-tts / mac-say",
   "desc": "young friendly female voice, clear and patient but lively, natural pace",
   "speed_cps": 5.4,
-  "alt_clone": "MiMo mimo-v2.5-tts-voiceclone，参照用 3 段 Grok 口播拼的 ≥12 秒干声（见 references/voice.md）"
+  "alt_clone": "MiMo mimo-v2.5-tts-voiceclone，参照用 3 段口播拼的 ≥12 秒干声（见 references/voice.md）"
  },
  "model": {
-  "name": "grok-video-1.5",
+  "name": "Seedance_2.5",
+  "engine": "xyq",
   "ratio": "9:16",
   "full_shot_resolution": "720p",
   "pip_shot_resolution": "480p",
-  "max_seconds": 15,
-  "price_per_second": {
-   "720p": 17,
-   "480p": 10
-  }
+  "max_seconds": 10,
+  "supported_models": [
+   "Seedance_2.5",
+   "Seedance_2.0_mini_lite",
+   "seedance2.0_vision",
+   "seedance2.0_fast_vision",
+   "grok-video-1.5"
+  ]
  },
  "acts": {
-  "full": "warm eye contact, expressive face, natural hand gestures",
+  "full": "warm eye contact, expressive face, natural hand gestures, facing camera speaking naturally",
   "pip": "calm explaining tone, small nods, occasionally glancing down as if reading a screen, small pointing gestures",
   "vlog": "relaxed lifestyle vlogger sharing a favorite tool, natural small head tilts and nods, one hand comes up briefly in a casual gesture",
   "depth": "medium shot with generous headroom and plain background visible on both sides of the head and shoulders (for text-behind-subject graphics), calm confident delivery"
  },
  "prompt_template": "The young woman in {ref} talks straight into her phone's front camera, same selfie framing, lighting and outfit as the reference, like a friendly Chinese tech vlogger {purpose}: {act}. Handheld selfie feel with only a very slight natural sway. She speaks Mandarin Chinese, clearly lip-synced, in a {voice}:\n“{line}”\nSound: only her voice and quiet room tone, no music, no subtitles, no on-screen text.",
+ "xyq_prompt_template": "参考图中的年轻女性面向镜头自然口播，保持相同的发型、服装和自拍构图，光线柔和，表情生动，手势自然，对口型生动讲解，{act}。画面真实无杂物，无字幕水印。",
  "disclosure": "内容由 AI 数字人演绎",
  "other_hosts": {
   "me": {
    "name": "用户本人数字人（藏青 polo）",
-   "reference_material": "material:338484",
    "asset": "assets/host_me_polo.jpg",
+   "reference_material": "material:338484",
    "ratio": "16:9",
    "note": "用户本人照片，只给用户自己的片子用；横屏照直接出横屏口播",
    "voice": "warm, steady, confident male voice around 35 years old, natural pace",
-   "prompt_template": "The man in {ref} talks straight to the camera, same framing, gray studio backdrop, navy polo shirt, glasses and soft lighting as the reference, like a friendly tech blogger {purpose}: {act}. Locked-off camera, no zoom. He speaks {language}, clearly lip-synced, in a {voice}:\n“{line}”\nSound: only his voice and quiet room tone, no music, no subtitles, no captions, no on-screen text of any kind."
+   "prompt_template": "The man in {ref} talks straight to the camera, same framing, gray studio backdrop, navy polo shirt, glasses and soft lighting as the reference, like a friendly tech blogger {purpose}: {act}. Locked-off camera, no zoom. Clearly lip-synced. Sound: clear speech, no music, no subtitles, no captions, no on-screen text.",
+   "xyq_prompt_template": "参考图中的男子面向镜头沉稳专业口播，保持相同发型服装与灰色演播室背景，对口型讲解，{act}。画面高清无字幕水印。"
   },
   "cat": {
    "name": "橘猫店长",
@@ -62,6 +84,6 @@
   "fr": "100%",
   "es": "100%",
   "ar": "99%",
-  "note": "2026-10 第三期实测 whisper 回听准确率；台词提前翻好再写进提示词"
+  "note": "whisper 回听准确率实测；台词提前翻好再写进提示词"
  }
 }

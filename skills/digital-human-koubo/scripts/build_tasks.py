@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-"""口播稿 → Grok 分段任务（create_tasks 的 tasks 数组）+ 费用估算。
+"""口播稿 → 视频分段任务（支持 Grok / Renoise 与小云雀 CLI 模式）+ 费用估算。
 
 用法：
   python3 build_tasks.py script.json out_tasks.json [--purpose "teaching a beginner tutorial step by step"] [--all-720p]
+  
+  # 若使用小云雀 CLI 本地生成，推荐直接运行一体化脚本：
+  python3 scripts/xyq_generate.py script.json [--model Seedance_2.5] [--ratio 9:16]
 
 script.json：[{"id": "s1", "shot": "full|pip|vlog", "t": "这一段要念的台词", "host": "tank|me", "lang": "Mandarin Chinese|English|Japanese|…"}, ...]
 - host：tank = 白背心数字人（9:16，默认）；me = 用户本人数字人（16:9，persona.json → other_hosts.me）

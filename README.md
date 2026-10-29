@@ -9,6 +9,7 @@ Script, lip-synced AI presenter, voice clean-up, captions, and pro-YouTuber-styl
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-black.svg)](LICENSE)
 ![Agent Skill](https://img.shields.io/badge/Agent%20Skill-SKILL.md-orange)
+[![Xiaoyunque CLI](https://img.shields.io/badge/video-Xiaoyunque%20CLI%20(Seedance)-00C853)](https://github.com/yww520/digital-human-koubo)
 [![Renoise MCP](https://img.shields.io/badge/video-Renoise%20MCP-ff7a1a)](https://renoise.ai/mcp?utm_medium=xcom&utm_source=official)
 ![Remotion](https://img.shields.io/badge/edit-Remotion%204-0b84f3)
 
@@ -50,7 +51,9 @@ Click a GIF (or "Watch") to play the full video. Every demo below was produced w
 ## What it does
 
 - **Digital human from one photo** — a fixed presenter (face, outfit, voice description, prompt template) stored in `persona.json`, so every video is the same person. Composite her into any scene (livestream studio, shop, classroom, Kyoto street) with GPT Image first, then make her talk.
-- **Lip-synced talking clips** — the script is split into ≤ 15-second segments and generated with **Grok Video 1.5** through **[Renoise MCP](https://renoise.ai/mcp?utm_medium=xcom&utm_source=official)**. Other models (Wan 3.0, OmniHuman for your own recording) are documented.
+- **Lip-synced talking clips (Dual-Engine)** —
+  - **Xiaoyunque CLI (`pippit-tool-cli`)**: generates video locally with **Seedance 2.5 / 2.0** models driven by automated TTS audio (`edge-tts` or macOS `say`). Fast, zero proxy dependency, and high visual quality.
+  - **Renoise MCP**: generates with **Grok Video 1.5** or Wan 3.0 via remote MCP.
 - **Cost gate** — the agent always quotes *segments · seconds · credits · balance* first and waits for your "yes". It generates segment 1 for you to check before batching the rest.
 - **Quality control** — every segment is transcribed with whisper and compared with the script, and 4 frames per segment are inspected (Grok sometimes burns subtitles into the picture; those segments get re-shot).
 - **Voice unification** — 1/3-octave spectral matching, de-essing, one shared small-room reverb and loudness normalisation, so 30 separately-generated clips sound like one recording (sibilance spread 13.2 dB → 5.9 dB in our tests).

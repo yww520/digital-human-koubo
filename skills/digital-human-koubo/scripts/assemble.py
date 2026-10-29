@@ -16,7 +16,20 @@ WM = os.environ.get('WHISPER_MODEL') or next((p for p in map(os.path.expanduser,
 clean = lambda s: re.sub(r'[\s，。、：；！？,.:;!?“”]', '', s).lower()
 Path('cut').mkdir(exist_ok=True); rep = []
 for s in S:
-    sid = s['id']; src = f"gen/renoise-{IDS[sid]}.mp4"; wav = f'cut/{sid}.wav'
+    sid = s['id']
+    target_id = IDS.get(sid, sid)
+    candidates = [
+        Path(f"gen/{sid}.mp4"),
+        Path(f"gen/xyq-{target_id}.mp4"),
+        Path(f"gen/renoise-{target_id}.mp4"),
+        Path(f"gen/{target_id}.mp4"),
+        Path(str(target_id))
+    ]
+    src_path = next((p for p in candidates if p.exists()), None)
+    src = str(src_path) if src_path else f"gen/renoise-{target_id}.mp4"
+    if not os.path.exists(src):
+        sys.exit(f"错误: 找不到视频文件 {src} (段 ID: {sid})。请先通过 xyq_generate.py 或 build_tasks.py 生成并下载。")
+    wav = f'cut/{sid}.wav'
     lg = s.get('lang_code', lang)
     subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', src, '-ar', '16000', '-ac', '1', wav], check=True)
     cmd = ['whisper-cli', '-m', WM, '-l', lg] + (['--prompt', '以下是普通话的句子。', '-ml', '1'] if lg == 'zh' else []) + ['-oj', '-of', f'cut/{sid}', '-f', wav]

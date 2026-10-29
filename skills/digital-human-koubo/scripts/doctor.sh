@@ -12,6 +12,27 @@ need(){ # need 名称 用途 mac装法 win装法 linux装法 其他装法
 }
 echo "数字人口播 · 本机环境检查（$OS）"
 command -v ffmpeg >/dev/null && ok "ffmpeg $(ffmpeg -version | head -1 | awk '{print $3}')" || need "ffmpeg" "抽帧、拼接、响度" "brew install ffmpeg" "winget install Gyan.FFmpeg  或  choco install ffmpeg" "sudo apt install ffmpeg  （或 dnf / pacman）" "ffmpeg.org 下载安装包"
+
+# 小云雀 CLI 检查
+if command -v pippit-tool-cli >/dev/null; then
+  LOGIN_INFO=$(pippit-tool-cli status 2>/dev/null)
+  if echo "$LOGIN_INFO" | grep -q '"logged_in":true'; then
+    ok "pippit-tool-cli（小云雀 CLI 已登录，支持 Seedance 视频直出）"
+  else
+    need "pippit-tool-cli 登录" "小云雀视频生成" "pippit-tool-cli login" "pippit-tool-cli login" "pippit-tool-cli login" "运行 pippit-tool-cli login"
+  fi
+else
+  need "pippit-tool-cli" "小云雀 CLI 视频生成引擎" "安装并配置 pippit-tool-cli 后运行 pippit-tool-cli login" "安装并配置 pippit-tool-cli" "安装并配置 pippit-tool-cli" "小云雀 CLI"
+fi
+
+# TTS 引擎检查（用于数字人口型驱动音频）
+if command -v edge-tts >/dev/null; then
+  ok "edge-tts（微软神经音色 TTS，推荐）"
+elif [ "$SYS" = "mac" ] && command -v say >/dev/null; then
+  ok "macOS say（系统内置离线语音兜底，无需联网）"
+else
+  need "edge-tts" "生成对口型驱动音频" "pip install edge-tts" "pip install edge-tts" "pip install edge-tts" "pip install edge-tts"
+fi
 PY=$(command -v python3.14 || command -v python3 || command -v python)
 if [ -n "$PY" ]; then
   ok "Python $($PY -c 'import sys;print(sys.version.split()[0])')"
