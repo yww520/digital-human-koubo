@@ -13,7 +13,7 @@ mkdir -p "$DST" && cp -R "$SRC/." "$DST/"
 # 参考实现不带素材：音效和配乐从花字模板拿
 if [ ! -f "$DST/public/sfx/pop.wav" ]; then mkdir -p "$DST/public" && (cp -R "$(dirname "$SRC")/../huazi-916/public/sfx" "$(dirname "$SRC")/../huazi-916/public/music" "$DST/public/" 2>/dev/null || cp -R "$(dirname "$SRC")/huazi-916/public/sfx" "$(dirname "$SRC")/huazi-916/public/music" "$DST/public/" 2>/dev/null || true); fi
 # node_modules：npm 源常 SSL 失败，优先从本机已有的 Remotion 4.0.408 工程克隆（APFS 克隆不占空间）
-for c in ${DH_NODE_MODULES_FROM:-} ~/Desktop/packaging-lab ~/Desktop/renoise-koubo/edit ~/Desktop/renoise-academy-ep3/film; do   # 本机已有 Remotion 工程就克隆它的 node_modules（可用 DH_NODE_MODULES_FROM 指定），否则 npm install
+for c in ${DH_NODE_MODULES_FROM:-} ~/.digital-human-koubo/remotion_base ~/Desktop/packaging-lab ~/Desktop/renoise-koubo/edit ~/Desktop/renoise-academy-ep3/film; do   # 本机已有 Remotion 工程就克隆它的 node_modules（可用 DH_NODE_MODULES_FROM 指定），否则 npm install
   if [ -d "$c/node_modules/remotion" ] && [ -d "$c/node_modules/lottie-web" ] && [ -d "$c/node_modules/d3-geo" ]; then cp -cR "$c/node_modules" "$DST/" 2>/dev/null || cp -R "$c/node_modules" "$DST/"; echo "node_modules ← $c"; break; fi
 done
 [ -d "$DST/node_modules" ] || (cd "$DST" && npm install)
